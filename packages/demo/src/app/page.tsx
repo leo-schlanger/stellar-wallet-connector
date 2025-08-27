@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { StellarWalletConnector } from '@stellar-wallet-connector/core';
 import { WalletConnector } from '@stellar-wallet-connector/react';
+import { KaleFarmDashboard } from '@stellar-wallet-connector/kale';
 const connector = new StellarWalletConnector({
   network: 'testnet',
   autoConnect: false
@@ -12,6 +13,7 @@ function App() {
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'wallet' | 'kale'>('wallet');
 
   const handleConnect = (pk: string) => {
     setPublicKey(pk);
@@ -32,141 +34,233 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-8 text-gray-900">
           Stellar Universal Wallet Connector
         </h1>
         <p className="text-center text-gray-600 mb-8 text-lg">
           A unified SDK for connecting dApps to multiple Stellar wallets with a single, consistent API.
         </p>
-        
-        <div className="bg-white rounded-lg p-6 shadow-lg mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Connect Your Wallet</h2>
-          <WalletConnector
-            connector={connector}
-            onConnect={handleConnect}
-            onDisconnect={handleDisconnect}
-          />
-          
-          {error && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded p-4">
-              <h3 className="font-semibold text-red-800">Error</h3>
-              <p className="text-red-600">{error}</p>
-            </div>
-          )}
-          
-          {publicKey && (
-            <div className="mt-6 space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded p-4">
-                <h3 className="font-semibold text-green-800">Connected!</h3>
-                <p className="text-green-600 font-mono text-sm break-all">
-                  {publicKey}
-                </p>
-                <p className="text-green-700 text-sm mt-2">
-                  Wallet: {connector.getCurrentWallet()?.name}
-                </p>
-              </div>
-              
+
+        {publicKey && (
+          <div className="flex justify-center mb-8">
+            <div className="bg-white rounded-lg shadow-md p-1">
               <button
-                onClick={testConnection}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                onClick={() => setActiveTab('wallet')}
+                className={`px-6 py-3 rounded-md font-medium transition-colors duration-200 ${
+                  activeTab === 'wallet'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
               >
-                Test Connection
+                Wallet Connector
+              </button>
+              <button
+                onClick={() => setActiveTab('kale')}
+                className={`px-6 py-3 rounded-md font-medium transition-colors duration-200 ${
+                  activeTab === 'kale'
+                    ? 'bg-green-600 text-white'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                🌱 KALE Farming
               </button>
             </div>
-          )}
-        </div>
-        
-        <div className="bg-white rounded-lg p-6 shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Available Wallets</h2>
-          <p className="text-gray-600 mb-4">
-            The SDK automatically detects installed wallets and provides a unified interface for all supported Stellar wallets.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {connector.getAvailableWallets().map(wallet => (
-              <div key={wallet.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-3 mb-3">
-                  {wallet.icon && (
-                    <img 
-                      src={wallet.icon} 
-                      alt={wallet.name}
-                      className="w-8 h-8"
-                    />
-                  )}
-                  <h3 className="font-semibold text-gray-900">{wallet.name}</h3>
+          </div>
+        )}
+
+        {activeTab === 'wallet' && (
+          <div className="bg-white rounded-lg p-6 shadow-lg mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Connect Your Wallet</h2>
+            <WalletConnector
+              connector={connector}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+            />
+
+            {error && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded p-4">
+                <h3 className="font-semibold text-red-800">Error</h3>
+                <p className="text-red-600">{error}</p>
+              </div>
+            )}
+
+            {publicKey && (
+              <div className="mt-6 space-y-4">
+                <div className="bg-green-50 border border-green-200 rounded p-4">
+                  <h3 className="font-semibold text-green-800">Connected!</h3>
+                  <p className="text-green-600 font-mono text-sm break-all">
+                    {publicKey}
+                  </p>
+                  <p className="text-green-700 text-sm mt-2">
+                    Wallet: {connector.getCurrentWallet()?.name}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-600 mb-3">{wallet.description}</p>
-                <div className="flex items-center justify-between">
-                  <div className={`px-2 py-1 rounded text-xs font-medium ${
-                    wallet.installed 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {wallet.installed ? 'Installed' : 'Not Installed'}
+
+                <button
+                  onClick={testConnection}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Test Connection
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'kale' && publicKey && (
+          <KaleFarmDashboard connector={connector} network="testnet" />
+        )}
+
+        {activeTab === 'kale' && !publicKey && (
+          <div className="bg-white rounded-lg p-6 shadow-lg mb-8 text-center">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">🌱 KALE Farming</h2>
+            <p className="text-gray-600 mb-4">
+              Connect your Stellar wallet to start farming KALE tokens
+            </p>
+            <WalletConnector
+              connector={connector}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+            />
+          </div>
+        )}
+        
+        {activeTab === 'wallet' && (
+          <>
+            <div className="bg-white rounded-lg p-6 shadow-lg">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Available Wallets</h2>
+              <p className="text-gray-600 mb-4">
+                The SDK automatically detects installed wallets and provides a unified interface for all supported Stellar wallets.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {connector.getAvailableWallets().map(wallet => (
+                  <div key={wallet.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center space-x-3 mb-3">
+                      {wallet.icon && (
+                        <img
+                          src={wallet.icon}
+                          alt={wallet.name}
+                          className="w-8 h-8"
+                        />
+                      )}
+                      <h3 className="font-semibold text-gray-900">{wallet.name}</h3>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">{wallet.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div className={`px-2 py-1 rounded text-xs font-medium ${
+                        wallet.installed
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {wallet.installed ? 'Installed' : 'Not Installed'}
+                      </div>
+                      {!wallet.installed && wallet.website && (
+                        <a
+                          href={wallet.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                        >
+                          Install
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  {!wallet.installed && wallet.website && (
-                    <a
-                      href={wallet.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 text-xs font-medium"
-                    >
-                      Install
-                    </a>
-                  )}
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8 bg-white rounded-lg p-6 shadow-lg">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Features</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">🔌</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Universal Interface</h3>
+                    <p className="text-sm text-gray-600">One API for all Stellar wallets</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">⚡</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Auto-detection</h3>
+                    <p className="text-sm text-gray-600">Automatically finds installed wallets</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">🎯</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">TypeScript</h3>
+                    <p className="text-sm text-gray-600">Full type safety and IntelliSense</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">⚛️</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">React Ready</h3>
+                    <p className="text-sm text-gray-600">Pre-built React components</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">🧪</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Well Tested</h3>
+                    <p className="text-sm text-gray-600">Comprehensive test coverage</p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="text-2xl">📱</div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Mobile Support</h3>
+                    <p className="text-sm text-gray-600">Works with mobile wallets</p>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-        
-        <div className="mt-8 bg-white rounded-lg p-6 shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Features</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="flex items-start space-x-3">
-              <div className="text-2xl">🔌</div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Universal Interface</h3>
-                <p className="text-sm text-gray-600">One API for all Stellar wallets</p>
-              </div>
             </div>
-            <div className="flex items-start space-x-3">
-              <div className="text-2xl">⚡</div>
+          </>
+        )}
+
+        {activeTab === 'kale' && (
+          <div className="bg-white rounded-lg p-6 shadow-lg">
+            <h2 className="text-2xl font-bold mb-4 text-gray-800">🌱 About KALE Farming</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-semibold text-gray-900">Auto-detection</h3>
-                <p className="text-sm text-gray-600">Automatically finds installed wallets</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">What is KALE?</h3>
+                <p className="text-gray-600 mb-4">
+                  KALE is a Proof-of-Teamwork token on Stellar that rewards collaborative farming.
+                  Stake KALE tokens, submit proof-of-work hashes, and earn rewards based on your stake,
+                  time gap, and hash difficulty.
+                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">How it works:</h3>
+                <ol className="list-decimal list-inside text-gray-600 space-y-2">
+                  <li><strong>Plant:</strong> Stake your KALE tokens to start farming</li>
+                  <li><strong>Work:</strong> Submit proof-of-work hashes to compete</li>
+                  <li><strong>Harvest:</strong> Claim your farming rewards</li>
+                </ol>
               </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="text-2xl">🎯</div>
               <div>
-                <h3 className="font-semibold text-gray-900">TypeScript</h3>
-                <p className="text-sm text-gray-600">Full type safety and IntelliSense</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="text-2xl">⚛️</div>
-              <div>
-                <h3 className="font-semibold text-gray-900">React Ready</h3>
-                <p className="text-sm text-gray-600">Pre-built React components</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="text-2xl">🧪</div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Well Tested</h3>
-                <p className="text-sm text-gray-600">Comprehensive test coverage</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="text-2xl">📱</div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Mobile Support</h3>
-                <p className="text-sm text-gray-600">Works with mobile wallets</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Contract Details</h3>
+                <div className="bg-gray-50 rounded p-4">
+                  <p className="text-sm text-gray-600"><strong>Contract ID:</strong></p>
+                  <p className="font-mono text-xs text-gray-800 break-all">
+                    CDL74RF5BLYR2YBLCCI7F5FB6TPSCLKEJUBSD2RSVWZ4YHF3VMFAIGWA
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Features</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>✅ Proof-of-Teamwork farming</li>
+                    <li>✅ Variable difficulty mining</li>
+                    <li>✅ Time-based reward multipliers</li>
+                    <li>✅ Soroban smart contract integration</li>
+                    <li>✅ Mobile-friendly interface</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

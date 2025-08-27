@@ -1,0 +1,31 @@
+{
+  "name": "@stellar-wallet-connector/kale",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.esm.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "test": "vitest",
+    "dev": "rollup -c -w"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^11.0.0",
+    "@stellar-wallet-connector/core": "file:../core"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "rollup": "^4.0.0",
+    "tslib": "^2.6.0",
+    "vitest": "^1.0.0",
+    "jsdom": "^23.0.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
+  }
+}
