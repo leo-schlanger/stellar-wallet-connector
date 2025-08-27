@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import { StellarWalletConnector } from '@stellar-wallet-connector/core';
 import { WalletConnector } from '@stellar-wallet-connector/react';
-import { Asset, Operation, TransactionBuilder, Networks, Server } from '@stellar/stellar-sdk';
-
 const connector = new StellarWalletConnector({
   network: 'testnet',
   autoConnect: false
@@ -12,7 +10,6 @@ const connector = new StellarWalletConnector({
 
 function App() {
   const [publicKey, setPublicKey] = useState<string | null>(null);
-  const [txResult, setTxResult] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,44 +21,13 @@ function App() {
 
   const handleDisconnect = () => {
     setPublicKey(null);
-    setTxResult(null);
     setError(null);
     console.log('Disconnected');
   };
 
-  const testTransaction = async () => {
-    if (!publicKey) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const server = new Server('https://horizon-testnet.stellar.org');
-      
-      // Load the account
-      const account = await server.loadAccount(publicKey);
-      
-      // Create a simple payment transaction
-      const transaction = new TransactionBuilder(account, {
-        fee: '100000',
-        networkPassphrase: Networks.TESTNET
-      })
-      .addOperation(Operation.payment({
-        destination: publicKey, // Send to self for demo
-        asset: Asset.native(),
-        amount: '0.0000001'
-      }))
-      .setTimeout(30)
-      .build();
-
-      const result = await connector.signTransaction(transaction.toXDR());
-      setTxResult(result.signedXDR);
-    } catch (error) {
-      console.error('Transaction failed:', error);
-      setError(error instanceof Error ? error.message : 'Transaction failed');
-    } finally {
-      setIsLoading(false);
-    }
+  const testConnection = () => {
+    console.log('Available wallets:', connector.getAvailableWallets());
+    console.log('Installed wallets:', connector.getInstalledWallets());
   };
 
   return (
@@ -102,27 +68,11 @@ function App() {
               </div>
               
               <button
-                onClick={testTransaction}
-                disabled={isLoading}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                onClick={testConnection}
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               >
-                {isLoading && (
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                  </svg>
-                )}
-                <span>{isLoading ? 'Signing...' : 'Test Transaction Signing'}</span>
+                Test Connection
               </button>
-              
-              {txResult && (
-                <div className="bg-blue-50 border border-blue-200 rounded p-4">
-                  <h3 className="font-semibold text-blue-800">Transaction Signed!</h3>
-                  <p className="text-blue-600 font-mono text-xs break-all mt-2">
-                    {txResult}
-                  </p>
-                </div>
-              )}
             </div>
           )}
         </div>

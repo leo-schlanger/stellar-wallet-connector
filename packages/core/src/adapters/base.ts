@@ -15,7 +15,7 @@ export abstract class BaseWalletAdapter implements WalletAdapter {
     return this.signTransaction(entryXdr, options);
   }
 
-  protected checkInstallation(): void {
+  public checkInstallation(): void {
     if (!this.isInstalled()) {
       throw new Error(`${this.walletInfo.name} is not installed. Please install it from ${this.walletInfo.website}`);
     }

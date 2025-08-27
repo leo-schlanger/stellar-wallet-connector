@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, beforeEach } from 'vitest';
 
 // Mock window object for browser APIs
 Object.defineProperty(window, 'location', {

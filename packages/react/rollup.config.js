@@ -13,5 +13,5 @@ export default {
     }
   ],
   plugins: [typescript()],
-  external: ['react', 'react-dom', '@stellar-wallet-connector/core']
+  external: ['react', 'react-dom', 'react/jsx-runtime', '@stellar-wallet-connector/core']
 };
