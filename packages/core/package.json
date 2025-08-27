@@ -1,0 +1,21 @@
+{
+  "name": "@stellar-wallet-connector/core",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "test": "vitest",
+    "dev": "rollup -c -w"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^11.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^11.0.0",
+    "rollup": "^4.0.0",
+    "tslib": "^2.6.0",
+    "vitest": "^1.0.0",
+    "jsdom": "^23.0.0"
+  }
+}
