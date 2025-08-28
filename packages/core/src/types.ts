@@ -39,3 +39,9 @@ export interface StellarWalletConnectorOptions {
   autoConnect?: boolean;
   adapters?: WalletAdapter[];
 }
+
+export interface TransactionResult {
+  success: boolean;
+  transactionHash?: string;
+  error?: string;
+}

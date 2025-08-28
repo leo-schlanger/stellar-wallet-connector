@@ -1,5 +1,5 @@
 import {
-  Server,
+  Horizon,
   TransactionBuilder,
   Account,
   xdr,
@@ -8,7 +8,8 @@ import {
   Networks,
   Address,
   nativeToScVal,
-  scValToNative
+  scValToNative,
+  Transaction
 } from '@stellar/stellar-sdk';
 import { StellarWalletConnector } from '@stellar-wallet-connector/core';
 import { KaleFarmStatus, KaleRewardEstimate, KaleTransactionResult, KaleFarmOptions } from './types';
@@ -16,7 +17,7 @@ import { KaleFarmStatus, KaleRewardEstimate, KaleTransactionResult, KaleFarmOpti
 export class KaleService {
   private contractId: string;
   private network: 'testnet' | 'mainnet';
-  private server: Server;
+  private server: Horizon.Server;
   private rpc: SorobanRpc.Server;
 
   // Endereço do contrato KALE oficial
@@ -30,7 +31,7 @@ export class KaleService {
       ? Networks.PUBLIC
       : Networks.TESTNET;
 
-    this.server = new Server(
+    this.server = new Horizon.Server(
       this.network === 'mainnet'
         ? 'https://horizon.stellar.org'
         : 'https://horizon-testnet.stellar.org'
@@ -61,7 +62,8 @@ export class KaleService {
       }
 
       // Get account details
-      const account = await this.server.getAccount(publicKey);
+      const accountRecord = await this.server.accounts().accountId(publicKey).call();
+      const account = new Account(accountRecord.account_id, accountRecord.sequence);
 
       // Create contract instance
       const contract = new Contract(this.contractId);
@@ -84,22 +86,21 @@ export class KaleService {
       }
 
       // Assemble the transaction with the simulation result
-      transaction = SorobanRpc.assembleTransaction(transaction, simulation)
-        .setSorobanData(simulation.result!.sorobanData!)
-        .build();
+      transaction = SorobanRpc.assembleTransaction(transaction, simulation).build();
 
       // Sign the transaction
       const signedResult = await connector.signTransaction(transaction.toXDR());
 
       // Submit the transaction
-      const submitResult = await this.rpc.sendTransaction(signedResult.signedXDR);
+      const signedTransaction = TransactionBuilder.fromXDR(signedResult.signedXDR, this.network === 'mainnet' ? Networks.PUBLIC : Networks.TESTNET);
+      const submitResult = await this.rpc.sendTransaction(signedTransaction);
 
       if (submitResult.status !== 'PENDING') {
         throw new Error(`Transaction failed: ${submitResult.status}`);
       }
 
       // Wait for confirmation
-      let status = submitResult.status;
+      let status: any = submitResult.status;
       let attempts = 0;
       while (status === 'PENDING' && attempts < 10) {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -144,7 +145,8 @@ export class KaleService {
       }
 
       // Get account details
-      const account = await this.server.getAccount(publicKey);
+      const accountRecord = await this.server.accounts().accountId(publicKey).call();
+      const account = new Account(accountRecord.account_id, accountRecord.sequence);
 
       // Create contract instance
       const contract = new Contract(this.contractId);
@@ -169,21 +171,22 @@ export class KaleService {
 
       // Assemble the transaction with the simulation result
       transaction = SorobanRpc.assembleTransaction(transaction, simulation)
-        .setSorobanData(simulation.result!.sorobanData!)
+
         .build();
 
       // Sign the transaction
       const signedResult = await connector.signTransaction(transaction.toXDR());
 
       // Submit the transaction
-      const submitResult = await this.rpc.sendTransaction(signedResult.signedXDR);
+      const signedTransaction = TransactionBuilder.fromXDR(signedResult.signedXDR, this.network === 'mainnet' ? Networks.PUBLIC : Networks.TESTNET);
+      const submitResult = await this.rpc.sendTransaction(signedTransaction);
 
       if (submitResult.status !== 'PENDING') {
         throw new Error(`Transaction failed: ${submitResult.status}`);
       }
 
       // Wait for confirmation
-      let status = submitResult.status;
+      let status: any = submitResult.status;
       let attempts = 0;
       while (status === 'PENDING' && attempts < 10) {
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -225,7 +228,8 @@ export class KaleService {
       }
 
       // Get account details
-      const account = await this.server.getAccount(publicKey);
+      const accountRecord = await this.server.accounts().accountId(publicKey).call();
+      const account = new Account(accountRecord.account_id, accountRecord.sequence);
 
       // Create contract instance
       const contract = new Contract(this.contractId);
@@ -246,21 +250,22 @@ export class KaleService {
 
       // Assemble the transaction with the simulation result
       transaction = SorobanRpc.assembleTransaction(transaction, simulation)
-        .setSorobanData(simulation.result!.sorobanData!)
+
         .build();
 
       // Sign the transaction
       const signedResult = await connector.signTransaction(transaction.toXDR());
 
       // Submit the transaction
-      const submitResult = await this.rpc.sendTransaction(signedResult.signedXDR);
+      const signedTransaction = TransactionBuilder.fromXDR(signedResult.signedXDR, this.network === 'mainnet' ? Networks.PUBLIC : Networks.TESTNET);
+      const submitResult = await this.rpc.sendTransaction(signedTransaction);
 
       if (submitResult.status !== 'PENDING') {
         throw new Error(`Transaction failed: ${submitResult.status}`);
       }
 
       // Wait for confirmation
-      let status = submitResult.status;
+      let status: any = submitResult.status;
       let attempts = 0;
       while (status === 'PENDING' && attempts < 10) {
         await new Promise(resolve => setTimeout(resolve, 1000));

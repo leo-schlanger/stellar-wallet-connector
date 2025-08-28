@@ -28,10 +28,12 @@ export class StellarWalletConnector {
     ];
 
     const adaptersToUse = this.options.adapters || defaultAdapters;
-    
+
     adaptersToUse.forEach(adapter => {
       this.adapters.set(adapter.walletInfo.id, adapter);
     });
+
+    console.log(`🚀 Stellar Wallet Connector initialized with ${this.adapters.size} adapters`);
   }
 
   getAvailableWallets(): WalletInfo[] {
@@ -48,16 +50,29 @@ export class StellarWalletConnector {
       throw new Error(`Wallet with id "${walletId}" not found`);
     }
 
+    // Disconnect current adapter if any
+    if (this.currentAdapter) {
+      await this.disconnect();
+    }
+
+    console.log(`🔌 Connecting to ${adapter.walletInfo.name}...`);
     const result = await adapter.connect();
     this.currentAdapter = adapter;
-    
+
+    console.log(`✅ Successfully connected to ${adapter.walletInfo.name}`);
+
     return result;
   }
 
   async disconnect(): Promise<void> {
     if (this.currentAdapter) {
+      const walletName = this.currentAdapter.walletInfo.name;
+      console.log(`🔌 Disconnecting from ${walletName}...`);
+
       await this.currentAdapter.disconnect();
       this.currentAdapter = null;
+
+      console.log(`✅ Disconnected from ${walletName}`);
     }
   }
 
@@ -66,10 +81,14 @@ export class StellarWalletConnector {
       throw new Error('No wallet connected');
     }
 
+    const networkPassphrase = this.options.network === 'mainnet'
+      ? 'Public Global Stellar Network ; September 2015'
+      : 'Test SDF Network ; September 2015';
+
+    console.log(`✍️ Signing transaction with ${this.currentAdapter.walletInfo.name}...`);
+
     return await this.currentAdapter.signTransaction(xdr, {
-      networkPassphrase: this.options.network === 'mainnet' 
-        ? 'Public Global Stellar Network ; September 2015'
-        : 'Test SDF Network ; September 2015'
+      networkPassphrase
     });
   }
 
@@ -83,5 +102,9 @@ export class StellarWalletConnector {
 
   getPublicKey(): string | null {
     return this.currentAdapter?.getPublicKey() || null;
+  }
+
+  getAdapter(walletId: string): WalletAdapter | null {
+    return this.adapters.get(walletId) || null;
   }
 }
